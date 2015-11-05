@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`rol` (
   `Id` INT(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`Id`))
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf-8;
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`usuarios` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf-8;
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`noticias` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf-8;
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`imagenes` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf-8;
+DEFAULT CHARACTER SET = utf8;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
