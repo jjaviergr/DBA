@@ -1,7 +1,7 @@
 -- -----------------------------------------------------
 -- Schema noticias
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `noticias` DEFAULT CHARACTER SET utf-8 ;
+CREATE SCHEMA IF NOT EXISTS `noticias` DEFAULT CHARACTER SET utf8 ;
 USE `noticias` ;
 
 -- -----------------------------------------------------
