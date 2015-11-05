@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`usuarios` (
   CONSTRAINT `fk_usuarios_rol`
     FOREIGN KEY (`rol_Id`)
     REFERENCES `noticias`.`rol` (`Id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf-8;
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`noticias` (
   CONSTRAINT `fk_noticias_usuarios1`
     FOREIGN KEY (`usuarios_Login` , `usuarios_rol_Id`)
     REFERENCES `noticias`.`usuarios` (`Login` , `rol_Id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf-8;
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `noticias`.`imagenes` (
   CONSTRAINT `fk_imagenes_noticias1`
     FOREIGN KEY (`noticias_id`)
     REFERENCES `noticias`.`noticias` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf-8;
