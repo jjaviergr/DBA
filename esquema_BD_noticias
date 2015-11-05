@@ -1,0 +1,75 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema Noticias
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema Noticias
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `Noticias` ;
+USE `Noticias` ;
+
+-- -----------------------------------------------------
+-- Table `Noticias`.`Usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Noticias`.`Usuarios` (
+  `Login` VARCHAR(45) NOT NULL,
+  `Password` VARCHAR(45) NULL,
+  `Rol` INT NULL,
+  `Nombre` VARCHAR(45) NULL,
+  `Apellidos` VARCHAR(45) NULL,
+  `e-mail` VARCHAR(45) NULL,
+  `Fecha_Nacimento` DATE NULL,
+  `curso` INT NULL,
+  `aula` VARCHAR(1) NULL,
+  PRIMARY KEY (`Login`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Noticias`.`Rol`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Noticias`.`Rol` (
+  `Nombre` INT NOT NULL,
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Noticias`.`Noticias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Noticias`.`Noticias` (
+  `id` INT NOT NULL,
+  `Titulo` VARCHAR(45) NULL,
+  `Cuerpo` VARCHAR(45) NULL,
+  `Imagen` INT NULL,
+  `Video` INT NULL,
+  `fecha_publicacion` DATETIME NULL,
+  `fecha_caducidad` DATETIME NULL,
+  `Usuario_Autor` INT NULL,
+  `Noticiascol` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Noticias`.`Imagenes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Noticias`.`Imagenes` (
+  `id` INT NOT NULL,
+  `foto` MEDIUMBLOB NULL,
+  `Altura` INT NULL,
+  `Anchura` INT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
