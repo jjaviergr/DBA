@@ -8,7 +8,7 @@ USE `noticias` ;
 -- Table `noticias`.`rol`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `noticias`.`rol` (
-  `Nombre` INT(11) NOT NULL,
+  `Nombre` VARCHAR(45) NOT NULL,
   `Id` INT(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`Id`))
 ENGINE = InnoDB
