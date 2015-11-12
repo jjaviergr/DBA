@@ -1,42 +1,31 @@
 <!DOCTYPE html>
-
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-    </head>
-    <body>
-        <html>
-    <head>
-        <title>Pagina de Login</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width">
-    </head>
-    <body>
-        <form action="login.php" method="post">
-            <fieldset>
-                <legend>Formulario de login </legend>
-                <label>Inserta el login
-                    <input type="text" name="login" id="login"/>
-                </label>
-                <label>Inserta el password 
-                    <input type="password" name="password" id="password"/>
-                </label>
-            <input id="Boton_Envio" type="submit" value="Enviar"/>
-            </fieldset>
-        </form>
-    </body>
 
-        <?php
-       include_once "utils.php";
-       
-       
-//       Utils::conectaDb();
-//       Utils::imprime("imagenes");
-//       Utils::imprime("noticias");
-//       Utils::imprime("rol");
-//       Utils::imprime("usuarios");
-       
-        ?>
-    </body>
+<head lang="es">
+    <title>Iniciar Sesion</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href=".//css//estilos.css">
+</head>
+
+<body>
+    <div class="sesion effect2" id="color">
+        <h2>I.E.S. Aguadulce</h2>
+        <form class="formulario" role="form" action=".//php//login.php" method='post'>
+            <div class="usuario">
+                <input type="text" placeholder="E-mail / usuario"  name="login">
+            </div>
+            <div class="contraseña">
+                <input type="password" class="form-control" placeholder="Contraseña" name="pass">
+            </div>
+            <div class="enviar">
+                <button type="submit" class="enviar"><span>Enviar</span>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+ 
+    
+</body>
+
 </html>

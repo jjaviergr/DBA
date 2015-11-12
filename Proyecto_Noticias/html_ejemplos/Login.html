@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="es">
+    <title>Iniciar Sesion</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href=".//css//estilos.css">
+</head>
+
+<body>
+    <div class="sesion effect2" id="color">
+        <h2>I.E.S. Aguadulce</h2>
+        <form class="formulario" role="form" action=".//php//Login.php">
+            <div class="usuario">
+                <input type="text" placeholder="E-mail / usuario" id="login">
+            </div>
+            <div class="contraseña">
+                <input type="password" class="form-control" placeholder="Contraseña" id="pass">
+            </div>
+            <div class="enviar">
+                <button type="submit" class="enviar"><span>Enviar</span>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <?php    
+      print_r($_REQUEST);
+    ?>
+
+</body>
+
+</html>
