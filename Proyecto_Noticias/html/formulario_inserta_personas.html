@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pagina de Personas</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+    </head>
+    <body>
+        <form action="inserta_personas.php" method="post">
+            <fieldset>
+                <!--dni,nombre,apellidos,direccion,activado-->
+                <legend>Formulario de personas </legend>
+                <label>Inserta el DNI
+                    <input type="text" name="dni" id="dni"/>
+                </label>
+                <label>Inserta el nombre 
+                    <input type="text" name="nombre" id="nombre"/>
+                </label>
+                <label>Inserta el apellidos 
+                    <input type="text" name="apellidos" id="apellidos"/>
+                </label>
+                <label>Inserta el direccion 
+                    <input type="text" name="direccion" id="direccion"/>
+                </label>
+                <label>Selecciona 
+                    <input type="radio" name="boton_radio" value="true" id="radio_activado"/> 
+                </label>
+                <label>
+                    <input type="radio" name="boton_radio" value="false" id="radio_desactivado"/>    
+                    <!--<input type="radio" name="gender" value="male"> Male<br>
+                    <input type="radio" name="gender" value="female"> Female-->
+                </label>
+                
+            <input id="Boton_Envio" type="submit" value="Enviar"/>
+            </fieldset>
+        </form>
+    </body>
+</html>
