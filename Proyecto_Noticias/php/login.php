@@ -51,10 +51,24 @@
                      *grabo cookie con id rol.
                      * mando a pagina noticias.
                      */
-                    $query_recupera_rol="select rol.nombre from rol where rol.id=?";
-                    $r_rol = $dwes->prepare($recupera_rol);
+//                   
+                    $rol_recuperado=$fila['rol_id'];
+                    switch ($rol_recuperado) // Esto es por si quiero distintos tiempos de cookie
+                    {                        
+                        case 2:$duracion=30*24*60*60;break;
+                        default:$duracion=365*24*60*60;
+                    }
+                    $name="usuario";
+                    $dato=$rol_recuperado;
                     
-                    //header("Location: productos.php");                    
+                    setcookie($name,$dato,$duracion);
+                    
+                    $host  = $_SERVER['HTTP_HOST'];
+                    $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+                    $extra = 'noticias.php';
+                    header("Location: http://$host/$extra");
+//                    header("Location: http://$host$uri/$extra");
+//                    exit;
             }
             else 
             {
@@ -64,13 +78,11 @@
                 unset($resultado);
             }
             unset($dwes);
-            $mivar="asdasdasd";
+           
         }
    }
 ?>
-<?php
 
-?>
 
 </body>
 </html>
