@@ -16,14 +16,15 @@
 
     
     
-print "<p>";
-print_r($_REQUEST);
-print "</p>";
-    $query = "select Login,Password from usuarios where Login=? and Password=?";
+print "<p>";print_r($_REQUEST);print "</p>";
+
+    $query_autenticacion = "select Login,Password,rol_id from usuarios where Login=? and Password=?";
+    $query_recup_rol="select rol.nombre from rol where rol.id=?";
+    
     $login = recoge("login");
     $password = recoge("pass");
     $db = conectaDb("noticias","root","");    
-    $result = $db->prepare($query);
+    $result = $db->prepare($query_autenticacion);
     if ((strcmp($login,"")==0) || (strcmp($password,"")==0)) 
     {
         print "<br>".(strcmp($login,""));
@@ -96,7 +97,7 @@ print "</p>";
             if (get_magic_quotes_gpc()) {
                 $tmp = stripslashes($tmp);
             }
-            $tmp = recorta($var, $tmp);
+            //$tmp = recorta($var, $tmp);
             return $tmp;
         }
 //
