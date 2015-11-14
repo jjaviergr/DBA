@@ -18,29 +18,30 @@
 //   $uri=  $_SERVER['PHP_SELF'];
 //    print "<br>HOST :$host";
 //    print "<br>URI :$uri";
-
    $pagina_destino="index.php";
-
     // 1. Comprobamos si ya tenemos credenciales guardadas  
 //       print "<br>cookiesss ";print_r($_COOKIE);
 //        print "<br>". $_COOKIE['login'];
 //       print "<br>1 ".isset($_COOKIE["login"])."  2 ".isset($_COOKIE["pass"]);
-
+   $intentado=0;
     if (isset($_COOKIE['login']) && isset($_COOKIE['pass']))
     {
         print "<br>Hay cookies";
         $usuario=$_COOKIE['login'];
         $password=$_COOKIE['pass'];
-        $intentado=$_COOKIE['intento_sin_exito'];
+        if (isset($_COOKIE['intentado']))
+        {
+           $intentado=$_COOKIE['intentado'];        
+        }
             
-        if (!intentado) // probamos con las credenciales guardadas.
+        if (!$intentado) // probamos con las credenciales guardadas.
         {
             //Accedio con exito la ultima vez
             print "<br>Es la 1º vez que accede con este navegador";
-           if( autentica($url,$esquema,$bd_user,$bd_pass,$login,$password))
+           if( autentica($bd_url,$esquema,$bd_user,$bd_pass,$usuario,$password))
            {
                print "<br>Es un usuario con credenciales en buen estado";
-               graba_cookie_rol_recuperado($bd_url, $bd_esquema, $bd_user, $bd_pass);
+               graba_session($bd_url, $esquema, $bd_user, $bd_pass, $usuario, $password);               
                print "Location: http://$host/proyecto_noticias/index.php";
 //               header("Location: http://$host/proyecto_noticias/index.php");                    
            }                           
@@ -49,15 +50,13 @@
                 //intento logarse con información de las cookies sin exito
 //                print "<br>Es un usuario con cookies que cambio sus credenciales";
                 setcookie("intentado","true",60, "/"); //grabo el intento
-                usa_formulario(1,$bd_url, $esquema, $bd_user, $bd_pass);
+                usa_formulario(0,$bd_url, $esquema, $bd_user, $bd_pass);
            }
                         
         }
     }
     else //no tiene credenciales guardadas en cookies. 
-    {
-       print "<br>Es un usuario sin cookies. Es su 1º vez";
-//       print_r($_POST);
+    {      
        usa_formulario(1,$bd_url, $esquema, $bd_user, $bd_pass);           
     }
         
@@ -78,7 +77,7 @@
           { 
              //guardo cookies       
 //             print "<br>Usando formulario";
-             $longevidad=graba_cookie_rol_recuperado($bd_url, $esquema, $bd_user, $bd_pass,$usuario,$password);
+             $longevidad=graba_session($bd_url, $esquema, $bd_user, $bd_pass,$usuario,$password);
              if($grabar_cookies===1)
              {
 //                print "<br>longevidad :$longevidad";
@@ -86,7 +85,7 @@
                 print "<br>Grabando cookies de credenciales";
              }
              print "<br>Location: http://$host/proyecto_noticias/index.php";
-//             header("Location: http://$host/proyecto_noticias/index.php"); 
+//           header("Location: http://$host/proyecto_noticias/index.php"); 
           }
           else
           {
@@ -107,22 +106,28 @@
         $exito_pass=setcookie("pass",$password,time()+$longevidad, "/");
         print "login $exito_login pass $exito_pass  $longevidad";
     }
-
-    function graba_cookie_rol_recuperado($bd_url, $bd_esquema, $bd_user, $bd_pass,$login,$password)
+    
+    function determina_longevidad($rol_recuperado)
     {
-//        print "<br>Graba_cookie_rol_recuperado $bd_url, $bd_esquema, $bd_user, $bd_pass,$login,$password"   ;
-        
-        $rol_recuperado=  determina_rol($bd_url, $bd_esquema, $bd_user, $bd_pass,$login,$password);
         switch ($rol_recuperado) // Esto es por si quiero distintos tiempos de cookie
         {                        
             case "2":$duracion=30*24*60*60;break;
             default:$duracion=365*24*60*60;
         }
-        //Grabo la cookie con la info de rol.
-        $exito=setcookie("rol_usuario",$rol_recuperado,time()+$duracion, "/");
-//        print "<br>Duracion :$duracion  $exito";
-        
         return($duracion);
+    }
+    
+    function graba_session($bd_url, $bd_esquema, $bd_user, $bd_pass,$usuario,$password)
+    {
+//        print "<br>Graba_cookie_rol_recuperado $bd_url, $bd_esquema, $bd_user, $bd_pass,$login,$password"   ;
+        
+        $rol_recuperado=  determina_rol($bd_url, $bd_esquema, $bd_user, $bd_pass,$usuario,$password);
+        $duracion=  determina_longevidad($rol_recuperado);
+        //inicio sesión y grabo
+        session_start();
+        $_SESSION['usuario']=$usuario;
+        $_SESSION['usuario']=$rol_recuperado;
+        
     }
     
     function determina_rol($bd_url,$bd_esquema,$bd_user,$bd_pass,$login,$password)
@@ -130,7 +135,9 @@
 //        print "<br>determina_rol $bd_url,$bd_esquema,$bd_user,$bd_pass,$login,$password";
         $dwes=conecta_bd($bd_url, $bd_esquema, $bd_user, $bd_pass);
         
-        $resultado = $dwes->prepare('select Rol from usuarios where Login like :login AND Password like :passwd');       
+//        print "<br> usuarioRol : $login - Rolpass : $password <br>";
+        //select Rol_id from usuarios where Login like 'fulano' AND Password like 'e10adc3949ba59abbe56e057f20f883e';
+        $resultado = $dwes->prepare('select Rol_id from usuarios where Login like :login AND Password like :passwd');       
         $resultado->execute(Array(':login' => $login,':passwd'=>$password));
        
         $numfilas=$resultado->rowCount();
@@ -140,14 +147,14 @@
         if($numfilas>0) 
         {
             $fila = $resultado->fetch();
-            return($fila['Rol']);
+            return($fila['Rol_id']);
             print "<br>Usuario autenticado";
         }
         else 
         {
             // Si las credenciales no son válidas, se vuelven a pedir
-            $error = "Usuario o contraseña no válidos!";
-            print "<br>$error";
+            $error = "<br>Fallo al recuperar el Rol";
+            print "$error";
             return(false);
         }
         
