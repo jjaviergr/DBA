@@ -10,7 +10,11 @@ $host  = $_SERVER['HTTP_HOST'];
 $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
 $extra = '2.php';
 header("Location: http://$host$uri/$extra");
-exit;
+
+
+print "<br>HOST :$host";
+print "<br>URI :$uri";
+//exit;
 //header("Location :1.php");
 
 ?>
