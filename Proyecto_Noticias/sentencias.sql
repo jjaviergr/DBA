@@ -37,6 +37,17 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
+-- Table `noticias`.`etapa`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `noticias`.`etapa` (
+  `id` INT NOT NULL,
+  `nombre` VARCHAR(45),
+  `color` VARCHAR(45),
+  PRIMARY KEY (`id`)
+  ENGINE = InnoDB
+  DEFAULT CHARACTER SET = utf8;
+
+-- -----------------------------------------------------
 -- Table `noticias`.`noticias`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `noticias`.`noticias` (
@@ -47,8 +58,8 @@ CREATE TABLE IF NOT EXISTS `noticias`.`noticias` (
   `fecha_inicio` DATETIME NOT NULL,
   `fecha_fin` DATETIME NOT NULL,
   `usuarios_login` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`, `usuarios_Login`, `usuarios_rol_Id`),
-  INDEX `fk_noticias_usuarios_idx` (`usuarios_Login` ASC),
+  PRIMARY KEY (`id`, `usuarios_login`),
+  INDEX `fk_noticias_usuarios_idx` (`usuarios_login` ASC),
   CONSTRAINT `fk_noticias_usuarios`
     FOREIGN KEY (`usuarios_login`)
     REFERENCES `noticias`.`usuarios` (`login`)
