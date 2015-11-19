@@ -1,120 +1,233 @@
 <!DOCTYPE html>
 <html>
-
-<head lang="es">
-    <title>Iniciar Sesion</title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href=".//css//estilos.css">
+<head>
+  <meta  charset="UTF-8">
+  <title>Login </title>
+  <!--<link href=<link rel="stylesheet" type="text/css" href=".//css//estilos.css">--> 
 </head>
 
 <body>
 <?php
-
-/**
- * funcion login.php
- */
-
-    
-    
-print "<p>";
-print_r($_REQUEST);
-print "</p>";
-    $query = "select Login,Password from usuarios where Login=? and Password=?";
-    $login = recoge("login");
-    $password = recoge("pass");
-    $db = conectaDb("noticias","root","");    
-    $result = $db->prepare($query);
-    if ((strcmp($login,"")==0) || (strcmp($password,"")==0)) 
+   $bd_url="localhost";
+   $esquema="noticias";
+   $bd_user="root";
+   $bd_pass="";
+   
+   $host  = $_SERVER['HTTP_HOST'];
+   $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+//   $uri=  $_SERVER['PHP_SELF'];
+//    print "<br>HOST :$host";
+//    print "<br>URI :$uri";
+   $pagina_destino="index.php";
+    // 1. Comprobamos si ya tenemos credenciales guardadas  
+//       print "<br>cookiesss ";print_r($_COOKIE);
+//        print "<br>". $_COOKIE['login'];
+//       print "<br>1 ".isset($_COOKIE["login"])."  2 ".isset($_COOKIE["pass"]);
+   
+   $intentado=0;
+    if (isset($_COOKIE['login']) && isset($_COOKIE['pass']))
     {
-        print "<br>".(strcmp($login,""));
-        print "<br>".(strcmp($password,""));
-        print "<p>Error de credenciales</p>\n";
-    } else 
-    {
-        
-    
-        $result->bindParam(1, $login, PDO::PARAM_STR, 20);
-        $result->bindParam(2, $password, PDO::PARAM_STR, 20);           
-        $result->execute();
-
-// ***** comprueba que result tiene algo
-        if (!$result) 
+        print "<br>Hay cookies";
+        $usuario=$_COOKIE['login'];
+        $password=$_COOKIE['pass'];
+        if (isset($_COOKIE['intentado']))
         {
-            print "<p>Error en la consulta.</p>\n";
-        } 
+           $intentado=$_COOKIE['intentado'];        
+        }
+            
+        if (!$intentado) // probamos con las credenciales guardadas.
+        {
+            //Accedio con exito la ultima vez
+            print "<br>Es la 1º vez que accede con este navegador";
+           if( autentica($bd_url,$esquema,$bd_user,$bd_pass,$usuario,$password))
+           {
+               print "<br>Es un usuario con credenciales en buen estado";
+               graba_session($bd_url, $esquema, $bd_user, $bd_pass, $usuario, $password);               
+               print "<br>Location: http://$host/proyecto_noticias/index.php";
+//               header("Location: http://$host/proyecto_noticias/index.php");                    
+           }                           
+           else 
+           {
+                print "<br>Fallo de autenticación con cookies";
+//                print "<br>Es un usuario con cookies que cambio sus credenciales";
+                setcookie("intentado","true",60, "/"); //grabo el intento
+                usa_formulario(0,$bd_url, $esquema, $bd_user, $bd_pass);
+           }
+                        
+        }
+    }
+    else //no tiene credenciales guardadas en cookies. 
+    {    
+       print "<br>No tienes cookies , es tu 1º vez";
+       usa_formulario(1,$bd_url, $esquema, $bd_user, $bd_pass);           
+    }
+        
+    function usa_formulario($grabar_cookies,$bd_url, $esquema, $bd_user, $bd_pass)
+    {   
+//         print_r($_POST);
+       // No hay cookies guardadas
+       global $host,$uri,$pagina_destino;
+       
+       if (isset($_POST['login']) && isset($_POST['pass'])) 
+       {
+          $usuario = $_POST['login'];
+          $password = md5($_POST['pass']);
+//          print "<br>$usuario|$password";
+          
+//         echo("<br>usa_formulario_llamando a autentica  :".autentica($bd_url, $esquema, $bd_user, $bd_pass, $usuario, $password)."<br>");
+          if (autentica($bd_url, $esquema, $bd_user, $bd_pass, $usuario, $password)==1)
+          { 
+             //guardo cookies       
+//             print "<br>Usando formulario";
+             $longevidad=graba_session($bd_url, $esquema, $bd_user, $bd_pass,$usuario,$password);
+             if($grabar_cookies===1)
+             {
+//                print "<br>longevidad :$longevidad";
+                $longevidad=  determina_longevidad(determina_rol($bd_url, $esquema, $bd_user, $bd_pass, $usuario, $password));
+                graba_cookies_credenciales($usuario,$password,$longevidad);
+                print "<br>Grabando cookies de credenciales";
+             }
+             print "<br>Location: http://$host/proyecto_noticias/index.php";
+//           header("Location: http://$host/proyecto_noticias/index.php"); 
+          }
+          else
+          {
+              print "<br>No autentica por motivos desconocidos. Contacte con su adm.";
+          }
+       }
+       else
+       {         
+          print "Error de credenciales. Prueba otra vez.";
+          print_r($_POST);
+    }
+        
+    }
+       
+    function graba_cookies_credenciales($usuario,$password,$longevidad)
+    {
+        print "<br>Longividad cookie : $longevidad";
+        
+        $exito_login=setcookie("login",$usuario,time()+$longevidad, "/");
+        $exito_pass=setcookie("pass",$password,time()+$longevidad, "/");
+        print "<br>cookies de credenciales guardadas ";
+    }
+    
+    function determina_longevidad($rol_recuperado)
+    {
+        switch ($rol_recuperado) // Esto es por si quiero distintos tiempos de cookie
+        {                        
+            case "1":$duracion=30*24*60*60;break;
+            default:$duracion=365*24*60*60;
+        }
+        return($duracion);
+    }
+    
+    function graba_session($bd_url, $bd_esquema, $bd_user, $bd_pass,$usuario,$password)
+    {
+//        print "<br>Graba_cookie_rol_recuperado $bd_url, $bd_esquema, $bd_user, $bd_pass,$login,$password"   ;
+        
+        $rol_recuperado=  determina_rol($bd_url, $bd_esquema, $bd_user, $bd_pass,$usuario,$password);
+        $duracion=  determina_longevidad($rol_recuperado);
+        //inicio sesión y grabo
+        session_start();
+        $_SESSION['usuario']=$usuario;
+        $_SESSION['usuario']=$rol_recuperado;
+        print "<br>Sesión grabada";
+    }
+    
+    function determina_rol($bd_url,$bd_esquema,$bd_user,$bd_pass,$login,$password)
+    {
+//        print "<br>determina_rol $bd_url,$bd_esquema,$bd_user,$bd_pass,$login,$password";
+        $dwes=conecta_bd($bd_url, $bd_esquema, $bd_user, $bd_pass);
+        
+//        print "<br> usuarioRol : $login - Rolpass : $password <br>";
+        //select Rol_id from usuarios where Login like 'fulano' AND Password like 'e10adc3949ba59abbe56e057f20f883e';
+        $resultado = $dwes->prepare('select Rol_id from usuarios where Login like :login AND Password like :passwd');       
+        $resultado->execute(Array(':login' => $login,':passwd'=>$password));
+       
+        $numfilas=$resultado->rowCount();
+        
+//        print "<br>numfilasrol :$numfilas";
+        
+        if($numfilas>0) 
+        {
+            $fila = $resultado->fetch();
+            return($fila['Rol_id']);
+            print "<br>Usuario autenticado";
+        }
         else 
         {
-            if ($result->rowCount() <= 0) 
-            {
-                print "<br>No existe ningún usuario con ese nombre";
-            } 
-            else 
-            {
-                //chicha.
-                print "Autenticado";
-                session_start();
-                // Comprobamos si la variable ya existe
-                if (isset($_SESSION['visitas'])) {
-                    $_SESSION['visitas'] ++;
-                } else {
-                    $_SESSION['visitas'] = 0;
-                }
-
-                //0.01 Recuperar rol de usuario
-                $q_recupera_rol;
-                  //0.1 Grabar cookie de usuario 'login' si es nuevo o hay cambios
-                    //0.1.a Si 'login' es usuario grabar cookie tiempo infinito
-                    //0.1.b Si 'login' es otro grabar cookie para 1 mes.
-                //1. 
-                // 1.a Si rol es usuario lanzar y visionar consultas usuario.
-                // 1.b Si rol es profesor lanzar y visionar consultas profesor.
-                
-            }
+            // Si las credenciales no son válidas, se vuelven a pedir
+            $error = "<br>Fallo al recuperar el Rol";
+            print "$error";
+            return(false);
         }
-        $db = null; //hemos terminado. session_unset.???
+        
+        unset($resultado);
+        
+        cierra_db($dwes);
     }
-
-    /**
-     * Función que graba cookies
-     * @param type $nombre ; El nombre de la cookie
-     * @param type $dato   ; Los datos que vas a guardar en la cookie
-     * @param type $duracion ; Lo que deseas que dure.
-     */
-    function graba_cookie($nombre,$dato,$duracion)
+    
+    function cierra_db($bd)
     {
-        setcookie($name,$dato,$duracion);
+        try
+        {
+            unset($bd);
+        }
+        catch (Exception $e)
+        {
+            die("Error cerrando: " . $e->getMessage());
+        }
     }
     
+    function conecta_bd($bd_url,$bd_esquema,$bd_user,$bd_pass)
+    {
+//        print "<br>Conecta :$bd_url|$bd_esquema|$bd_user|$bd_pass";
+        try 
+        {
+            $opc = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8");
+            $dsn = "mysql:host=$bd_url;dbname=$bd_esquema";
+            $dwes = new PDO($dsn, $bd_user, $bd_pass, $opc);
+            if (!$dwes) {
+            print "<br>Fallo.Revisa conexión con BD";
+        }
+    }
+        catch (PDOException $e) {
+            print "<br>Excepcion con la BD : $e";
+        }
+        return $dwes;
+    }
     
-        /**
-         * Función que quita los caracteres especiales de la $var que recupere de ·$_REQUEST
-         * @param Cadena $var ; el nombre de la var que queremos extraer de $_REQUEST.
-         * @return Devuelve un texto sin blancos, ni slashes, ni caracteres especiales.
-         */
-        function recoge($var) {
-            $tmp = (isset($_REQUEST[$var])) ? strip_tags(trim(htmlspecialchars($_REQUEST[$var], ENT_QUOTES, "utf-8"))) : "";
-            if (get_magic_quotes_gpc()) {
-                $tmp = stripslashes($tmp);
-            }
-            $tmp = recorta($var, $tmp);
-            return $tmp;
+    function autentica($url,$esquema,$bd_user,$bd_pass,$login,$password)
+    {
+        $encontrado=FALSE;
+        
+//        print "<br>Autentica :$url|$esquema|$bd_user|$bd_pass|$login|$password";
+        
+        $dwes=conecta_bd($url,$esquema,$bd_user,$bd_pass);
+        $resultado = $dwes->prepare('select * from usuarios where Login like :login AND Password like :passwd');
+      
+  
+        $resultado->execute(Array(':login' => $login,':passwd'=>$password));
+       
+        
+        $numero_filas = $resultado->rowCount() ; 
+        
+//        print "<br>numero filas :$numero_filas";
+        if ( $numero_filas > 0 )
+        {
+           $encontrado=TRUE;        
         }
-//
-        /**
-         * FUNCIÓN DE CONEXIÓN CON LA BASE DE DATOS MYSQL
-         * @param cadena $esquema - Esquema al que nos queremos conectar.
-         * @return Un dataset a la BD a la que nos queremos conectar o una excepción.
-         */
-        function conectaDb($esquema, $bduser, $bdpass) {
-            try {
-                $db = new PDO("mysql:host=localhost;dbname=".$esquema, $bduser, $bdpass);
-                $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-                return($db);
-            } catch (PDOException $e) 
-            {
-               print "<p>Error: No puede conectarse con la base de datos.</p>\n";
-               exit();
-            }
-        }
+       
+        
+        unset($resultado);
+        cierra_db($dwes);
+        
+        
+        return($encontrado);
+    }
 ?>
+
+
 </body>
+</html>
